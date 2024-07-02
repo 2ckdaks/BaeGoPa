@@ -19,6 +19,7 @@ bin/
 
 ### IntelliJ IDEA ###
 application.properties
+docker-compose.yaml
 .idea
 *.iws
 *.iml
