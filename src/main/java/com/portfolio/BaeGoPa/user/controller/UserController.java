@@ -8,7 +8,6 @@ import com.portfolio.BaeGoPa.user.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -26,6 +25,7 @@ public class UserController {
     @Autowired
     private AuthenticationManagerBuilder authenticationManagerBuilder;
 
+    // 회원가입
     @PostMapping("/register")
     public ExceptionApi<UserEntity> registerUser(
             @RequestBody UserRequest userRequest
@@ -46,19 +46,13 @@ public class UserController {
         return registerUser;
     }
 
+    // 로그인시 jwt 발급
     @PostMapping("/login/jwt")
     public ExceptionApi<String> loginJwt(
             @RequestBody Map<String, String> data,
             HttpServletResponse response
-            ){
-        var authToken = new UsernamePasswordAuthenticationToken(
-                data.get("username"), data.get("password")
-        );
-        var auth = authenticationManagerBuilder.getObject().authenticate(authToken);
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
-        var jwt = JwtUtil.createToken(SecurityContextHolder.getContext().getAuthentication());
-        System.out.println(jwt);
+    ) {
+        String jwt = userService.loginJwt(data.get("username"), data.get("password"));
 
         var cookie = new Cookie("jwt", jwt);
         cookie.setMaxAge(10);
