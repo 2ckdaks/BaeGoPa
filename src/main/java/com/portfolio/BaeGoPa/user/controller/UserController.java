@@ -9,9 +9,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
@@ -55,7 +53,7 @@ public class UserController {
         String jwt = userService.loginJwt(data.get("username"), data.get("password"));
 
         var cookie = new Cookie("jwt", jwt);
-        cookie.setMaxAge(10);
+        cookie.setMaxAge(60 * 10); // 10분 동안 유효
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         response.addCookie(cookie);

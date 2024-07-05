@@ -50,7 +50,7 @@ public class JwtUtil implements ApplicationListener<ContextRefreshedEvent> {
                 .claim("userType", user.type)
                 .claim("authority", authorities) // 권한이 있다면 추가
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 10000)) //유효기간 10초
+                .setExpiration(new Date(System.currentTimeMillis() + 600000)) //유효기간 10초
                 .signWith(key)
                 .compact();
         return jwt;

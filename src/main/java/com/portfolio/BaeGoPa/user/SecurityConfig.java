@@ -1,4 +1,4 @@
-package com.portfolio.BaeGoPa;
+package com.portfolio.BaeGoPa.user;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
