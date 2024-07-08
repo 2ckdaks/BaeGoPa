@@ -16,7 +16,7 @@ public class StoreEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long StoreId;
+    private Long storeId;
 
     @ManyToOne
     @JoinColumn(name = "seller_id", nullable = false)
@@ -28,21 +28,21 @@ public class StoreEntity {
     @Column(nullable = false, length = 255)
     private String address;
 
-    @Column(length = 20)
+    @Column(nullable = false, length = 20)
     private String phone;
 
-    @Column(length = 50)
+    @Column(nullable = false, length = 50)
     private String category;
 
-    @Column(length = 255)
+    @Column(nullable = false, length = 255)
     private String photoUrl;
 
-    @Column(precision = 3, scale = 1)
-    private BigDecimal score;
+    @Column(nullable = false, precision = 3, scale = 1)
+    private BigDecimal score = BigDecimal.valueOf(0.0);
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private StoreStatus status;
+    private StoreStatus status = StoreStatus.PENDING;
 
     @Column(nullable = false, updatable = false)
     @org.hibernate.annotations.CreationTimestamp

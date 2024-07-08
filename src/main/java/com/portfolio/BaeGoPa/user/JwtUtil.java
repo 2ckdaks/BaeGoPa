@@ -8,6 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.security.core.Authentication;
 
@@ -65,5 +66,14 @@ public class JwtUtil implements ApplicationListener<ContextRefreshedEvent> {
         Claims claims = Jwts.parser().setSigningKey(key).build()
                 .parseClaimsJws(token).getBody();
         return claims;
+    }
+
+    public boolean validateToken(String token, User userDetails) {
+        final String username = extractToken(token).get("username", String.class);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    private boolean isTokenExpired(String token) {
+        return extractToken(token).getExpiration().before(new Date());
     }
 }

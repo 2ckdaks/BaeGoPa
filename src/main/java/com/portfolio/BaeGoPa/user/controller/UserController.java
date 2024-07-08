@@ -66,4 +66,10 @@ public class UserController {
 
         return loginJwt;
     }
+
+    // cookie저장 확인용 테스트 코드
+    @GetMapping("/")
+    public String index() {
+        return "index";  // src/main/resources/static/index.html 파일을 반환
+    }
 }
