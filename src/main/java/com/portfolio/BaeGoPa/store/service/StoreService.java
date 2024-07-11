@@ -2,6 +2,8 @@ package com.portfolio.BaeGoPa.store.service;
 
 import com.portfolio.BaeGoPa.store.db.StoreEntity;
 import com.portfolio.BaeGoPa.store.db.StoreRepository;
+import com.portfolio.BaeGoPa.store.db.StoreReviewEntity;
+import com.portfolio.BaeGoPa.store.db.StoreReviewRepository;
 import com.portfolio.BaeGoPa.user.db.UserEntity;
 import com.portfolio.BaeGoPa.user.db.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -9,15 +11,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 @Slf4j
 public class StoreService {
 
     @Autowired
     private StoreRepository storeRepository;
+    @Autowired
+    private StoreReviewRepository storeReviewRepository;
 
     @Autowired
     private UserRepository userRepository;
+
 
     public StoreEntity registerStore(
             String storeName,
@@ -26,6 +33,7 @@ public class StoreService {
             String category,
             String photoUrl
     ){
+        // TODO : 로그인 유저가 seller인지 확인 필요할듯?
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         log.info("Username from SecurityContext: {}", username);
         UserEntity seller = userRepository.findByUsername(username)
@@ -44,5 +52,28 @@ public class StoreService {
                 storeName, address, phone, category, photoUrl);
 
         return storeRepository.save(storeEntity);
+    }
+
+
+    public StoreReviewEntity registerReview(
+            Long storeId,
+            BigDecimal score,
+            String review
+    ){
+        // TODO : 리뷰작성자가 올바른지 검증 필요할듯?
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity consumer = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid consumer"));
+
+        StoreEntity store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid store"));
+
+        StoreReviewEntity storeReviewEntity = new StoreReviewEntity();
+        storeReviewEntity.setConsumer(consumer);
+        storeReviewEntity.setStoreId(store);
+        storeReviewEntity.setScore(score);
+        storeReviewEntity.setReview(review);
+
+        return storeReviewRepository.save(storeReviewEntity);
     }
 }
