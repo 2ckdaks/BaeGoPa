@@ -2,6 +2,8 @@ package com.portfolio.BaeGoPa.menu.service;
 
 import com.portfolio.BaeGoPa.menu.db.MenuEntity;
 import com.portfolio.BaeGoPa.menu.db.MenuRepository;
+import com.portfolio.BaeGoPa.menu.db.MenuReviewEntity;
+import com.portfolio.BaeGoPa.menu.db.MenuReviewRepository;
 import com.portfolio.BaeGoPa.store.db.StoreEntity;
 import com.portfolio.BaeGoPa.store.db.StoreRepository;
 import com.portfolio.BaeGoPa.user.db.UserEntity;
@@ -23,6 +25,8 @@ public class MenuService {
     private StoreRepository storeRepository;
     @Autowired
     private MenuRepository menuRepository;
+    @Autowired
+    private MenuReviewRepository menuReviewRepository;
 
     public MenuEntity registerMenu(
             Long storeId,
@@ -46,5 +50,28 @@ public class MenuService {
         menuEntity.setPhotoUrl(photoUrl);
 
         return menuRepository.save(menuEntity);
+    }
+
+    public MenuReviewEntity registerReview(
+            Long menuId,
+            BigDecimal score,
+            String review
+    ) {
+        // TODO : 리뷰작성자가 올바른지 검증 필요할듯?
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        UserEntity consumer = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid consumer"));
+
+        MenuEntity menu = menuRepository.findById(menuId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid menu"));
+
+        MenuReviewEntity menuReviewEntity = new MenuReviewEntity();
+        menuReviewEntity.setMenu(menu);
+        menuReviewEntity.setConsumer(consumer);
+        menuReviewEntity.setScore(score);
+        menuReviewEntity.setReview(review);
+
+        return menuReviewRepository.save(menuReviewEntity);
     }
 }
