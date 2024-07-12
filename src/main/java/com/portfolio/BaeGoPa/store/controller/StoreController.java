@@ -8,10 +8,9 @@ import com.portfolio.BaeGoPa.store.model.StoreReviewRequest;
 import com.portfolio.BaeGoPa.store.service.StoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/stores")
@@ -19,6 +18,19 @@ public class StoreController {
 
     @Autowired
     private StoreService storeService;
+
+    @GetMapping("/")
+    public ExceptionApi<List<StoreEntity>> getAllStores() {
+        List<StoreEntity> stores = storeService.getAllStores();
+
+        ExceptionApi<List<StoreEntity>> response = ExceptionApi.<List<StoreEntity>>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .data(stores)
+                .build();
+
+        return response;
+    }
 
     @PostMapping("/register")
     public ExceptionApi<StoreEntity> registerStore(

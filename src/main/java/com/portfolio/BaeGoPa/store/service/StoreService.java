@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -54,6 +55,9 @@ public class StoreService {
         return storeRepository.save(storeEntity);
     }
 
+    public List<StoreEntity> getAllStores() {
+        return storeRepository.findAll();
+    }
 
     public StoreReviewEntity registerReview(
             Long storeId,
