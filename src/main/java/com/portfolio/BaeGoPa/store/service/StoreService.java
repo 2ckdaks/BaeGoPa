@@ -64,6 +64,12 @@ public class StoreService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
     }
 
+    public List<StoreReviewEntity> getStoreReviews(Long storeId) {
+        StoreEntity store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
+        return storeReviewRepository.findByStoreId(store);
+    }
+
     public StoreReviewEntity registerReview(
             Long storeId,
             BigDecimal score,
