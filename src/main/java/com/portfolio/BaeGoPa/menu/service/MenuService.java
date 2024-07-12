@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -27,6 +28,12 @@ public class MenuService {
     private MenuRepository menuRepository;
     @Autowired
     private MenuReviewRepository menuReviewRepository;
+
+    public List<MenuEntity> getMenus(Long storeId) {
+        StoreEntity store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
+        return menuRepository.findByStoreId(store);
+    }
 
     public MenuEntity registerMenu(
             Long storeId,

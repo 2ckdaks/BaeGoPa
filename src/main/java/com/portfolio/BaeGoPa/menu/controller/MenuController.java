@@ -9,10 +9,9 @@ import com.portfolio.BaeGoPa.menu.service.MenuService;
 import com.portfolio.BaeGoPa.store.db.StoreReviewEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/menus")
@@ -20,6 +19,19 @@ public class MenuController {
 
     @Autowired
     private MenuService menuService;
+
+    @GetMapping("/{storeId}")
+    public ExceptionApi<List<MenuEntity>> getMenus(@PathVariable Long storeId) {
+        List<MenuEntity> menus = menuService.getMenus(storeId);
+
+        ExceptionApi<List<MenuEntity>> response = ExceptionApi.<List<MenuEntity>>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .data(menus)
+                .build();
+
+        return response;
+    }
 
     @PostMapping("/register")
     public ExceptionApi<MenuEntity> registerMenu(
