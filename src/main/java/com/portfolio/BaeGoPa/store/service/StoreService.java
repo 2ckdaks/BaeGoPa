@@ -59,6 +59,11 @@ public class StoreService {
         return storeRepository.findAll();
     }
 
+    public StoreEntity getStoreDetail(Long storeId) {
+        return storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
+    }
+
     public StoreReviewEntity registerReview(
             Long storeId,
             BigDecimal score,

@@ -32,6 +32,19 @@ public class StoreController {
         return response;
     }
 
+    @GetMapping("/detail/{storeId}")
+    public ExceptionApi<StoreEntity> getStoreDetail(@PathVariable Long storeId) {
+        StoreEntity store = storeService.getStoreDetail(storeId);
+
+        ExceptionApi<StoreEntity> response = ExceptionApi.<StoreEntity>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .data(store)
+                .build();
+
+        return response;
+    }
+
     @PostMapping("/register")
     public ExceptionApi<StoreEntity> registerStore(
             @RequestBody StoreRequest storeRequest
