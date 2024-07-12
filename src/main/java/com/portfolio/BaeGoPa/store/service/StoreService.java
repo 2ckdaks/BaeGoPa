@@ -70,6 +70,13 @@ public class StoreService {
         return storeReviewRepository.findByStoreId(store);
     }
 
+    public StoreReviewEntity getStoreReviewDetail(Long storeId, Long reviewId) {
+        StoreEntity store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
+        return storeReviewRepository.findByStoreIdAndReviewId(store, reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid review ID or review does not belong to the specified store"));
+    }
+
     public StoreReviewEntity registerReview(
             Long storeId,
             BigDecimal score,

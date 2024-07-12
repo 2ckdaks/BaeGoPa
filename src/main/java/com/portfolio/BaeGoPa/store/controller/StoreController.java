@@ -58,6 +58,17 @@ public class StoreController {
         return response;
     }
 
+    @GetMapping("/review/{storeId}/{reviewId}")
+    public ExceptionApi<StoreReviewEntity> getStoreReviewDetail(@PathVariable Long storeId, @PathVariable Long reviewId) {
+        StoreReviewEntity review = storeService.getStoreReviewDetail(storeId, reviewId);
+        ExceptionApi<StoreReviewEntity> response = ExceptionApi.<StoreReviewEntity>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .data(review)
+                .build();
+        return response;
+    }
+
     @PostMapping("/register")
     public ExceptionApi<StoreEntity> registerStore(
             @RequestBody StoreRequest storeRequest
