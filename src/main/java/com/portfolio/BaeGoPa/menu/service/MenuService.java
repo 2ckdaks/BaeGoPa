@@ -35,6 +35,11 @@ public class MenuService {
         return menuRepository.findByStoreId(store);
     }
 
+    public MenuEntity getMenuDetail(Long menuId){
+        return menuRepository.findById(menuId)
+                .orElseThrow(()-> new IllegalArgumentException("Invalid menu ID"));
+    }
+
     public MenuEntity registerMenu(
             Long storeId,
             String menuName,

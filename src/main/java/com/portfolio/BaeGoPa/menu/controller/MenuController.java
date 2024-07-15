@@ -33,6 +33,19 @@ public class MenuController {
         return response;
     }
 
+    @GetMapping("/{storeId}/{menuId}")
+    public ExceptionApi<MenuEntity> getMenuDetail(@PathVariable Long menuId){
+        MenuEntity menu = menuService.getMenuDetail(menuId);
+
+        ExceptionApi<MenuEntity> response = ExceptionApi.<MenuEntity>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .data(menu)
+                .build();
+
+        return response;
+    }
+
     @PostMapping("/register")
     public ExceptionApi<MenuEntity> registerMenu(
             @RequestBody MenuRequest menuRequest
