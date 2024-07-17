@@ -29,6 +29,13 @@ public class OrderService {
     @Autowired
     private MenuRepository menuRepository;
 
+    public List<OrderEntity> getOrders(Long storeId){
+        StoreEntity store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
+
+        return orderRepository.findByStore(store);
+    }
+
     public OrderEntity createOrder(
             Long storeId,
             List<OrderItemRequest> orderItemsRequest
