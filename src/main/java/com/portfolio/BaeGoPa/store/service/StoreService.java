@@ -6,6 +6,7 @@ import com.portfolio.BaeGoPa.store.db.StoreReviewEntity;
 import com.portfolio.BaeGoPa.store.db.StoreReviewRepository;
 import com.portfolio.BaeGoPa.user.db.UserEntity;
 import com.portfolio.BaeGoPa.user.db.UserRepository;
+import com.portfolio.BaeGoPa.user.db.UserType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -105,6 +106,15 @@ public class StoreService {
     public StoreEntity updateStore(Long storeId, String storeName, String address, String category, String phone, String photoUrl) {
         StoreEntity store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new NoSuchElementException("Store not found with id " + storeId));
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user"));
+
+        // 매장의 seller이거나 ADMIN 유형인 계정만 수정 가능
+        if (!store.getSeller().equals(user) && user.getType() != UserType.ADMIN) {
+            throw new IllegalArgumentException("You do not have permission to update this store");
+        }
 
         store.setStoreName(storeName);
         store.setAddress(address);
