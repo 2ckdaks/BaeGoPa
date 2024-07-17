@@ -5,6 +5,7 @@ import com.portfolio.BaeGoPa.store.db.StoreEntity;
 import com.portfolio.BaeGoPa.store.db.StoreReviewEntity;
 import com.portfolio.BaeGoPa.store.model.StoreRequest;
 import com.portfolio.BaeGoPa.store.model.StoreReviewRequest;
+import com.portfolio.BaeGoPa.store.model.StoreUpdateRequest;
 import com.portfolio.BaeGoPa.store.service.StoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -107,5 +108,28 @@ public class StoreController {
                 .build();
 
         return registerReview;
+    }
+
+    @PutMapping("/edit/{storeId}")
+    public ExceptionApi<StoreEntity> updateStore(
+            @PathVariable Long storeId,
+            @RequestBody StoreUpdateRequest storeUpdateRequest) {
+
+        StoreEntity updatedStore = storeService.updateStore(
+                storeId,
+                storeUpdateRequest.getStoreName(),
+                storeUpdateRequest.getAddress(),
+                storeUpdateRequest.getCategory(),
+                storeUpdateRequest.getPhone(),
+                storeUpdateRequest.getPhotoUrl()
+        );
+
+        ExceptionApi<StoreEntity> response = ExceptionApi.<StoreEntity>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .data(updatedStore)
+                .build();
+
+        return response;
     }
 }

@@ -10,9 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @Slf4j
@@ -97,5 +99,19 @@ public class StoreService {
         storeReviewEntity.setReview(review);
 
         return storeReviewRepository.save(storeReviewEntity);
+    }
+
+    @Transactional
+    public StoreEntity updateStore(Long storeId, String storeName, String address, String category, String phone, String photoUrl) {
+        StoreEntity store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new NoSuchElementException("Store not found with id " + storeId));
+
+        store.setStoreName(storeName);
+        store.setAddress(address);
+        store.setCategory(category);
+        store.setPhone(phone);
+        store.setPhotoUrl(photoUrl);
+
+        return storeRepository.save(store);
     }
 }
