@@ -46,6 +46,18 @@ public class MenuController {
         return response;
     }
 
+    @GetMapping("/review/{storeId}/{menuReviewId}")
+    public ExceptionApi<MenuReviewEntity> getMenuReviewDetail(@PathVariable Long storeId, @PathVariable Long menuReviewId){
+        MenuReviewEntity review = menuService.getMenuReviewDetail(storeId, menuReviewId);
+        ExceptionApi<MenuReviewEntity> response = ExceptionApi.<MenuReviewEntity>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .data(review)
+                .build();
+
+        return response;
+    }
+
     @PostMapping("/register")
     public ExceptionApi<MenuEntity> registerMenu(
             @RequestBody MenuRequest menuRequest

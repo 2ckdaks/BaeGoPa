@@ -40,6 +40,13 @@ public class MenuService {
                 .orElseThrow(()-> new IllegalArgumentException("Invalid menu ID"));
     }
 
+    public MenuReviewEntity getMenuReviewDetail(Long storeId, Long menuReviewId){
+        StoreEntity store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
+        return menuReviewRepository.findById(menuReviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid review ID or review does not belong to the specified store"));
+    }
+
     public MenuEntity registerMenu(
             Long storeId,
             String menuName,
