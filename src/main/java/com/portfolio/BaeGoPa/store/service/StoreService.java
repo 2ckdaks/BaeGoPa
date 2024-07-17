@@ -1,9 +1,6 @@
 package com.portfolio.BaeGoPa.store.service;
 
-import com.portfolio.BaeGoPa.store.db.StoreEntity;
-import com.portfolio.BaeGoPa.store.db.StoreRepository;
-import com.portfolio.BaeGoPa.store.db.StoreReviewEntity;
-import com.portfolio.BaeGoPa.store.db.StoreReviewRepository;
+import com.portfolio.BaeGoPa.store.db.*;
 import com.portfolio.BaeGoPa.user.db.UserEntity;
 import com.portfolio.BaeGoPa.user.db.UserRepository;
 import com.portfolio.BaeGoPa.user.db.UserType;
@@ -56,6 +53,24 @@ public class StoreService {
                 storeName, address, phone, category, photoUrl);
 
         return storeRepository.save(storeEntity);
+    }
+
+    @Transactional
+    public StoreEntity updateStoreStatus(Long storeId, StoreStatus status) {
+        StoreEntity store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new NoSuchElementException("Store not found with id " + storeId));
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity admin = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user"));
+
+        // 관리자 권한 확인
+        if (admin.getType() != UserType.ADMIN) {
+            throw new IllegalArgumentException("You do not have permission to update the store status");
+        }
+
+        store.setStatus(status);
+        return storeRepository.save(store);
     }
 
     public List<StoreEntity> getAllStores() {

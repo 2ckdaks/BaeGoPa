@@ -3,8 +3,10 @@ package com.portfolio.BaeGoPa.store.controller;
 import com.portfolio.BaeGoPa.exception.model.ExceptionApi;
 import com.portfolio.BaeGoPa.store.db.StoreEntity;
 import com.portfolio.BaeGoPa.store.db.StoreReviewEntity;
+import com.portfolio.BaeGoPa.store.db.StoreStatus;
 import com.portfolio.BaeGoPa.store.model.StoreRequest;
 import com.portfolio.BaeGoPa.store.model.StoreReviewRequest;
+import com.portfolio.BaeGoPa.store.model.StoreStatusRequest;
 import com.portfolio.BaeGoPa.store.model.StoreUpdateRequest;
 import com.portfolio.BaeGoPa.store.service.StoreService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,6 +110,22 @@ public class StoreController {
                 .build();
 
         return registerReview;
+    }
+
+    @PutMapping("/edit/status/{storeId}")
+    public ExceptionApi<StoreEntity> updateStoreStatus(
+            @PathVariable Long storeId,
+            @RequestBody StoreStatusRequest storeStatusRequest) {
+
+        StoreEntity updatedStore = storeService.updateStoreStatus(storeId, storeStatusRequest.getStatus());
+
+        ExceptionApi<StoreEntity> response = ExceptionApi.<StoreEntity>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .data(updatedStore)
+                .build();
+
+        return response;
     }
 
     @PutMapping("/edit/{storeId}")
