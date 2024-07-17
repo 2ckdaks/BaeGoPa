@@ -36,6 +36,14 @@ public class OrderService {
         return orderRepository.findByStore(store);
     }
 
+    public OrderEntity getOrderDetail(Long storeId, Long orderId) {
+        StoreEntity store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
+
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid order ID"));
+    }
+
     public OrderEntity createOrder(
             Long storeId,
             List<OrderItemRequest> orderItemsRequest

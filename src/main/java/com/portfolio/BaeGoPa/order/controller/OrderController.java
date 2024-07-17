@@ -30,6 +30,19 @@ public class OrderController {
         return response;
     }
 
+    @GetMapping("/{storeId}/{orderId}")
+    public ExceptionApi<OrderEntity> getOrderDetail(@PathVariable Long storeId, @PathVariable Long orderId) {
+        OrderEntity order = orderService.getOrderDetail(storeId, orderId);
+
+        ExceptionApi<OrderEntity> response = ExceptionApi.<OrderEntity>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .data(order)
+                .build();
+
+        return response;
+    }
+
     @PostMapping("/create")
     public ExceptionApi<OrderEntity> createOrder(
             @RequestBody OrderRequest orderRequest
