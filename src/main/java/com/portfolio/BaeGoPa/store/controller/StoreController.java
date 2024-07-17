@@ -132,4 +132,26 @@ public class StoreController {
 
         return response;
     }
+
+    @PutMapping("/review/edit/{storeId}/{reviewId}")
+    public ExceptionApi<StoreReviewEntity> updateStoreReview(
+            @PathVariable Long storeId,
+            @PathVariable Long reviewId,
+            @RequestBody StoreReviewRequest storeReviewRequest) {
+
+        StoreReviewEntity updatedReview = storeService.updateStoreReview(
+                storeId,
+                reviewId,
+                storeReviewRequest.getScore(),
+                storeReviewRequest.getReview()
+        );
+
+        ExceptionApi<StoreReviewEntity> response = ExceptionApi.<StoreReviewEntity>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .data(updatedReview)
+                .build();
+
+        return response;
+    }
 }

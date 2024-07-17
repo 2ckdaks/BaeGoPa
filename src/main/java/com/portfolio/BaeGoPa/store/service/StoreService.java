@@ -124,4 +124,26 @@ public class StoreService {
 
         return storeRepository.save(store);
     }
+
+    @Transactional
+    public StoreReviewEntity updateStoreReview(Long storeId, Long reviewId, BigDecimal score, String review) {
+        StoreEntity store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
+        StoreReviewEntity storeReview = storeReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new NoSuchElementException("Review not found with id " + reviewId));
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user"));
+
+        // 리뷰 작성자만 수정 가능
+        if (!storeReview.getConsumer().equals(user)) {
+            throw new IllegalArgumentException("You do not have permission to update this review");
+        }
+
+        storeReview.setScore(score);
+        storeReview.setReview(review);
+
+        return storeReviewRepository.save(storeReview);
+    }
 }
