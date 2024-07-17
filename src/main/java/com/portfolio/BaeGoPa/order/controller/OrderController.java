@@ -3,6 +3,7 @@ package com.portfolio.BaeGoPa.order.controller;
 import com.portfolio.BaeGoPa.exception.model.ExceptionApi;
 import com.portfolio.BaeGoPa.order.db.OrderEntity;
 import com.portfolio.BaeGoPa.order.model.OrderRequest;
+import com.portfolio.BaeGoPa.order.model.OrderStatusUpdateRequest;
 import com.portfolio.BaeGoPa.order.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -59,5 +60,21 @@ public class OrderController {
                 .build();
 
         return createOrder;
+    }
+
+    @PutMapping("/edit/{orderId}")
+    public ExceptionApi<OrderEntity> updateOrderStatus(
+            @PathVariable Long orderId,
+            @RequestBody OrderStatusUpdateRequest request
+    ){
+        OrderEntity orderEntity = orderService.updateOrderStatus(orderId, request.getStatus());
+
+        ExceptionApi<OrderEntity> updateOrder = ExceptionApi.<OrderEntity>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .data(orderEntity)
+                .build();
+
+        return updateOrder;
     }
 }

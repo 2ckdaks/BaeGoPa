@@ -5,6 +5,7 @@ import com.portfolio.BaeGoPa.menu.db.MenuRepository;
 import com.portfolio.BaeGoPa.order.db.OrderEntity;
 import com.portfolio.BaeGoPa.order.db.OrderItemEntity;
 import com.portfolio.BaeGoPa.order.db.OrderRepository;
+import com.portfolio.BaeGoPa.order.db.OrderStatus;
 import com.portfolio.BaeGoPa.order.model.OrderItemRequest;
 import com.portfolio.BaeGoPa.store.db.StoreEntity;
 import com.portfolio.BaeGoPa.store.db.StoreRepository;
@@ -76,6 +77,22 @@ public class OrderService {
         }
 
         order.setTotalPrice(totalPrice);
+        return orderRepository.save(order);
+    }
+
+    public OrderEntity updateOrderStatus(Long orderId, OrderStatus status) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity seller = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid seller"));
+
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid order ID"));
+
+        if (!order.getStore().getSeller().equals(seller)) {
+            throw new IllegalArgumentException("You do not have permission to update this order status");
+        }
+
+        order.setStatus(status);
         return orderRepository.save(order);
     }
 }
