@@ -161,4 +161,21 @@ public class StoreService {
 
         return storeReviewRepository.save(storeReview);
     }
+
+    @Transactional
+    public void deleteReview(Long storeReviewId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user"));
+
+        StoreReviewEntity review = storeReviewRepository.findById(storeReviewId)
+                .orElseThrow(() -> new NoSuchElementException("Review not found with id " + storeReviewId));
+
+        // 리뷰 작성자 또는 관리자만 삭제 가능
+        if (!review.getConsumer().equals(user) && !user.getType().equals(UserType.ADMIN)) {
+            throw new IllegalStateException("권한이 없습니다.");
+        }
+
+        storeReviewRepository.delete(review);
+    }
 }

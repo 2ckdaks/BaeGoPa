@@ -172,4 +172,16 @@ public class StoreController {
 
         return response;
     }
+
+    @DeleteMapping("/review/delete/{storeReviewId}")
+    public ExceptionApi<Void> deleteReview(@PathVariable Long storeReviewId){
+        storeService.deleteReview(storeReviewId);
+
+        ExceptionApi<Void> response = ExceptionApi.<Void>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .build();
+
+        return response;
+    }
 }
