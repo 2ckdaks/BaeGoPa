@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface MenuRepository extends JpaRepository<MenuEntity, Long> {
     List<MenuEntity> findByStoreId(StoreEntity store);
+    void deleteByStoreId(StoreEntity store);
 }

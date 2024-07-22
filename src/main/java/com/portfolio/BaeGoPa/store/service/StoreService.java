@@ -1,5 +1,10 @@
 package com.portfolio.BaeGoPa.store.service;
 
+import com.portfolio.BaeGoPa.menu.db.MenuEntity;
+import com.portfolio.BaeGoPa.menu.db.MenuRepository;
+import com.portfolio.BaeGoPa.order.db.OrderEntity;
+import com.portfolio.BaeGoPa.order.db.OrderItemRepository;
+import com.portfolio.BaeGoPa.order.db.OrderRepository;
 import com.portfolio.BaeGoPa.store.db.*;
 import com.portfolio.BaeGoPa.user.db.UserEntity;
 import com.portfolio.BaeGoPa.user.db.UserRepository;
@@ -25,6 +30,15 @@ public class StoreService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private MenuRepository menuRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
 
     public StoreEntity registerStore(
@@ -160,6 +174,42 @@ public class StoreService {
         storeReview.setReview(review);
 
         return storeReviewRepository.save(storeReview);
+    }
+
+    @Transactional
+    public void deleteStore(Long storeId) {
+        StoreEntity store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new NoSuchElementException("Store not found with id " + storeId));
+
+        // 로그인한 사용자 정보 가져오기
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user"));
+
+        // 관리자 권한 검사
+        if (!user.getType().equals(UserType.ADMIN)) {
+            throw new IllegalStateException("You do not have permission to delete this store");
+        }
+
+        // 관련된 리뷰 삭제
+        storeReviewRepository.deleteByStoreId(store);
+
+        // 관련된 메뉴와 주문 항목 삭제
+        List<MenuEntity> menus = menuRepository.findByStoreId(store);
+        for (MenuEntity menu : menus) {
+            orderItemRepository.deleteByMenu(menu);
+            menuRepository.delete(menu);
+        }
+
+        // 관련된 주문 삭제
+        List<OrderEntity> orders = orderRepository.findByStore(store);
+        for (OrderEntity order : orders) {
+            orderItemRepository.deleteByOrder(order);
+            orderRepository.delete(order);
+        }
+
+        // 매장 삭제
+        storeRepository.delete(store);
     }
 
     @Transactional

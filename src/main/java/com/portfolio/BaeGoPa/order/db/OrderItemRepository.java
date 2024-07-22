@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface OrderItemRepository extends JpaRepository<OrderItemEntity, Long> {
     List<OrderItemEntity> findByMenu(MenuEntity menu);
+    void deleteByMenu(MenuEntity menu);
+    void deleteByOrder(OrderEntity order);
 }
