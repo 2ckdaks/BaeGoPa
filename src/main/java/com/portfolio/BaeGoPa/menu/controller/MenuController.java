@@ -5,6 +5,7 @@ import com.portfolio.BaeGoPa.menu.db.MenuEntity;
 import com.portfolio.BaeGoPa.menu.db.MenuReviewEntity;
 import com.portfolio.BaeGoPa.menu.model.MenuRequest;
 import com.portfolio.BaeGoPa.menu.model.MenuReviewRequest;
+import com.portfolio.BaeGoPa.menu.model.MenuUpdateRequest;
 import com.portfolio.BaeGoPa.menu.service.MenuService;
 import com.portfolio.BaeGoPa.store.db.StoreReviewEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,5 +96,26 @@ public class MenuController {
                 .build();
 
         return registerReview;
+    }
+
+    @PutMapping("/edit/{menuId}")
+    public ExceptionApi<MenuEntity> updateMenu(
+            @PathVariable Long menuId,
+            @RequestBody MenuUpdateRequest menuUpdateRequest
+    ) {
+        MenuEntity updatedMenu = menuService.updateMenu(
+                menuId,
+                menuUpdateRequest.getMenuName(),
+                menuUpdateRequest.getPhotoUrl(),
+                menuUpdateRequest.getPrice()
+        );
+
+        ExceptionApi<MenuEntity> response = ExceptionApi.<MenuEntity>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .data(updatedMenu)
+                .build();
+
+        return response;
     }
 }

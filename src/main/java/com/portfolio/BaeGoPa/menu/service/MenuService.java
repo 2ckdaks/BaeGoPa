@@ -8,13 +8,16 @@ import com.portfolio.BaeGoPa.store.db.StoreEntity;
 import com.portfolio.BaeGoPa.store.db.StoreRepository;
 import com.portfolio.BaeGoPa.user.db.UserEntity;
 import com.portfolio.BaeGoPa.user.db.UserRepository;
+import com.portfolio.BaeGoPa.user.db.UserType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @Slf4j
@@ -92,5 +95,26 @@ public class MenuService {
         menuReviewEntity.setReview(review);
 
         return menuReviewRepository.save(menuReviewEntity);
+    }
+
+    @Transactional
+    public MenuEntity updateMenu(Long menuId, String menuName, String photoUrl, BigDecimal price) {
+        MenuEntity menu = menuRepository.findById(menuId)
+                .orElseThrow(() -> new NoSuchElementException("Menu not found with id " + menuId));
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user"));
+
+        // 권한 확인 (메뉴 소유자 또는 관리자만 수정 가능)
+        if (!menu.getStoreId().getSeller().equals(user) && !user.getType().equals(UserType.ADMIN)) {
+            throw new IllegalStateException("권한이 없습니다.");
+        }
+
+        menu.setMenuName(menuName);
+        menu.setPhotoUrl(photoUrl);
+        menu.setPrice(price);
+
+        return menuRepository.save(menu);
     }
 }
