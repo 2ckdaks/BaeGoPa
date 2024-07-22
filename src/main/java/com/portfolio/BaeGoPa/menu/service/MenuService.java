@@ -117,4 +117,24 @@ public class MenuService {
 
         return menuRepository.save(menu);
     }
+
+    @Transactional
+    public MenuReviewEntity updateReview(Long menuReviewId, BigDecimal score, String review) {
+        MenuReviewEntity menuReview = menuReviewRepository.findById(menuReviewId)
+                .orElseThrow(() -> new NoSuchElementException("Menu review not found with id " + menuReviewId));
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user"));
+
+        // 권한 확인 (리뷰 작성자만 수정 가능)
+        if (!menuReview.getConsumer().equals(user)) {
+            throw new IllegalStateException("권한이 없습니다.");
+        }
+
+        menuReview.setScore(score);
+        menuReview.setReview(review);
+
+        return menuReviewRepository.save(menuReview);
+    }
 }

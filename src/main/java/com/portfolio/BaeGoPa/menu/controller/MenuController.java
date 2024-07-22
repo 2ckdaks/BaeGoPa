@@ -5,6 +5,7 @@ import com.portfolio.BaeGoPa.menu.db.MenuEntity;
 import com.portfolio.BaeGoPa.menu.db.MenuReviewEntity;
 import com.portfolio.BaeGoPa.menu.model.MenuRequest;
 import com.portfolio.BaeGoPa.menu.model.MenuReviewRequest;
+import com.portfolio.BaeGoPa.menu.model.MenuReviewUpdateRequest;
 import com.portfolio.BaeGoPa.menu.model.MenuUpdateRequest;
 import com.portfolio.BaeGoPa.menu.service.MenuService;
 import com.portfolio.BaeGoPa.store.db.StoreReviewEntity;
@@ -114,6 +115,26 @@ public class MenuController {
                 .resultCode(String.valueOf(HttpStatus.OK.value()))
                 .resultMessage(HttpStatus.OK.name())
                 .data(updatedMenu)
+                .build();
+
+        return response;
+    }
+
+    @PutMapping("/review/edit/{menuReviewId}")
+    public ExceptionApi<MenuReviewEntity> updateReview(
+            @PathVariable Long menuReviewId,
+            @RequestBody MenuReviewUpdateRequest menuReviewUpdateRequest) {
+
+        MenuReviewEntity updatedReview = menuService.updateReview(
+                menuReviewId,
+                menuReviewUpdateRequest.getScore(),
+                menuReviewUpdateRequest.getReview()
+        );
+
+        ExceptionApi<MenuReviewEntity> response = ExceptionApi.<MenuReviewEntity>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .data(updatedReview)
                 .build();
 
         return response;
