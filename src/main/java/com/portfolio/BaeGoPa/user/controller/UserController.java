@@ -4,6 +4,7 @@ import com.portfolio.BaeGoPa.exception.model.ExceptionApi;
 import com.portfolio.BaeGoPa.user.JwtUtil;
 import com.portfolio.BaeGoPa.user.db.UserEntity;
 import com.portfolio.BaeGoPa.user.model.UserRequest;
+import com.portfolio.BaeGoPa.user.model.UserResponse;
 import com.portfolio.BaeGoPa.user.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,7 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -22,6 +26,22 @@ public class UserController {
 
     @Autowired
     private AuthenticationManagerBuilder authenticationManagerBuilder;
+
+    @GetMapping("/list")
+    public ExceptionApi<List<UserResponse>> getAllUsers() {
+        List<UserEntity> users = userService.getAllUsers();
+        List<UserResponse> userResponses = users.stream()
+                .map(user -> new UserResponse(user.getUserId(), user.getUsername(), user.getDisplayName(), user.getType(), user.getCreatedAt()))
+                .collect(Collectors.toList());
+
+        ExceptionApi<List<UserResponse>> response = ExceptionApi.<List<UserResponse>>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .data(userResponses)
+                .build();
+
+        return response;
+    }
 
     // 회원가입
     @PostMapping("/register")

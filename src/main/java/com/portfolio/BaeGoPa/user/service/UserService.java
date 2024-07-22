@@ -11,6 +11,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserService {
 
@@ -22,6 +24,20 @@ public class UserService {
 
     @Autowired
     private AuthenticationManagerBuilder authenticationManagerBuilder;
+
+    public List<UserEntity> getAllUsers() {
+        // 로그인한 사용자 정보 가져오기
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user"));
+
+        // 관리자 권한 검사
+        if (!user.getType().equals(UserType.ADMIN)) {
+            throw new IllegalStateException("You do not have permission to view this list");
+        }
+
+        return userRepository.findAll();
+    }
 
     public UserEntity registerUser(
             String username,
