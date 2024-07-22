@@ -4,6 +4,8 @@ import com.portfolio.BaeGoPa.menu.db.MenuEntity;
 import com.portfolio.BaeGoPa.menu.db.MenuRepository;
 import com.portfolio.BaeGoPa.menu.db.MenuReviewEntity;
 import com.portfolio.BaeGoPa.menu.db.MenuReviewRepository;
+import com.portfolio.BaeGoPa.order.db.OrderItemEntity;
+import com.portfolio.BaeGoPa.order.db.OrderItemRepository;
 import com.portfolio.BaeGoPa.store.db.StoreEntity;
 import com.portfolio.BaeGoPa.store.db.StoreRepository;
 import com.portfolio.BaeGoPa.user.db.UserEntity;
@@ -31,6 +33,8 @@ public class MenuService {
     private MenuRepository menuRepository;
     @Autowired
     private MenuReviewRepository menuReviewRepository;
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
     public List<MenuEntity> getMenus(Long storeId) {
         StoreEntity store = storeRepository.findById(storeId)
@@ -136,5 +140,43 @@ public class MenuService {
         menuReview.setReview(review);
 
         return menuReviewRepository.save(menuReview);
+    }
+
+    @Transactional
+    public void deleteMenu(Long menuId) {
+        MenuEntity menu = menuRepository.findById(menuId)
+                .orElseThrow(() -> new NoSuchElementException("Menu not found with id " + menuId));
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user"));
+
+        // 권한 확인 (메뉴 소유자 또는 관리자만 삭제 가능)
+        if (!menu.getStoreId().getSeller().equals(user) && !user.getType().equals(UserType.ADMIN)) {
+            throw new IllegalStateException("권한이 없습니다.");
+        }
+
+        // 먼저 연관된 주문 항목을 삭제
+        List<OrderItemEntity> orderItems = orderItemRepository.findByMenu(menu);
+        orderItemRepository.deleteAll(orderItems);
+
+        menuRepository.delete(menu);
+    }
+
+    @Transactional
+    public void deleteReview(Long menuReviewId) {
+        MenuReviewEntity menuReview = menuReviewRepository.findById(menuReviewId)
+                .orElseThrow(() -> new NoSuchElementException("Review not found with id " + menuReviewId));
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user"));
+
+        // 권한 확인 (리뷰 작성자만 삭제 가능)
+        if (!menuReview.getConsumer().equals(user)) {
+            throw new IllegalStateException("권한이 없습니다.");
+        }
+
+        menuReviewRepository.delete(menuReview);
     }
 }

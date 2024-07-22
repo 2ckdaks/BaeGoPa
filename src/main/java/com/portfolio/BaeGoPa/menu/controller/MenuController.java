@@ -139,4 +139,28 @@ public class MenuController {
 
         return response;
     }
+
+    @DeleteMapping("/delete/{menuId}")
+    public ExceptionApi<Void> deleteMenu(@PathVariable Long menuId) {
+        menuService.deleteMenu(menuId);
+
+        ExceptionApi<Void> response = ExceptionApi.<Void>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .build();
+
+        return response;
+    }
+
+    @DeleteMapping("/review/delete/{menuReviewId}")
+    public ExceptionApi<Void> deleteReview(@PathVariable Long menuReviewId){
+        menuService.deleteReview(menuReviewId);
+
+        ExceptionApi<Void> response = ExceptionApi.<Void>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .build();
+
+        return response;
+    }
 }
