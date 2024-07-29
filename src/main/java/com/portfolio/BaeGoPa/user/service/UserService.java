@@ -31,11 +31,11 @@ public class UserService {
         // 로그인한 사용자 정보 가져오기
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user"));
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자입니다."));
 
         // 관리자 권한 검사
         if (!user.getType().equals(UserType.ADMIN)) {
-            throw new IllegalStateException("You do not have permission to view this list");
+            throw new IllegalStateException("이 목록을 볼 권한이 없습니다.");
         }
 
         return userRepository.findAll();
@@ -45,7 +45,7 @@ public class UserService {
     public UserEntity getUserDetail() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user"));
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자입니다."));
     }
 
     public UserEntity registerUser(
@@ -77,8 +77,17 @@ public class UserService {
 
     @Transactional
     public UserEntity updateUser(Long userId, String displayName, String password) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity loggedInUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자입니다."));
+
+        // 권한 확인 (본인 또는 관리자만 수정 가능)
+        if (!loggedInUser.getUserId().equals(userId) && !loggedInUser.getType().equals(UserType.ADMIN)) {
+            throw new IllegalStateException("이 계정을 수정할 권한이 없습니다.");
+        }
+
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("User not found with id " + userId));
+                .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다. ID: " + userId));
 
         if (displayName != null && !displayName.isEmpty()) {
             user.setDisplayName(displayName);
@@ -93,8 +102,17 @@ public class UserService {
 
     @Transactional
     public void deleteUser(Long userId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity loggedInUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자입니다."));
+
+        // 권한 확인 (본인 또는 관리자만 삭제 가능)
+        if (!loggedInUser.getUserId().equals(userId) && !loggedInUser.getType().equals(UserType.ADMIN)) {
+            throw new IllegalStateException("이 계정을 삭제할 권한이 없습니다.");
+        }
+
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("User not found with id " + userId));
+                .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다. ID: " + userId));
         userRepository.delete(user);
     }
 }
