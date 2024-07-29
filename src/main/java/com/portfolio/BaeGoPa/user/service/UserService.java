@@ -10,8 +10,10 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class UserService {
@@ -71,5 +73,21 @@ public class UserService {
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         return JwtUtil.createToken(SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Transactional
+    public UserEntity updateUser(Long userId, String displayName, String password) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with id " + userId));
+
+        if (displayName != null && !displayName.isEmpty()) {
+            user.setDisplayName(displayName);
+        }
+
+        if (password != null && !password.isEmpty()) {
+            user.setPassword(passwordEncoder.encode(password));
+        }
+
+        return userRepository.save(user);
     }
 }

@@ -5,6 +5,7 @@ import com.portfolio.BaeGoPa.user.JwtUtil;
 import com.portfolio.BaeGoPa.user.db.UserEntity;
 import com.portfolio.BaeGoPa.user.model.UserRequest;
 import com.portfolio.BaeGoPa.user.model.UserResponse;
+import com.portfolio.BaeGoPa.user.model.UserUpdateRequest;
 import com.portfolio.BaeGoPa.user.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -106,5 +107,25 @@ public class UserController {
     @GetMapping("/")
     public String index() {
         return "index";  // src/main/resources/static/index.html 파일을 반환
+    }
+
+    @PutMapping("/edit/{userId}")
+    public ExceptionApi<UserEntity> updateUser(
+            @PathVariable Long userId,
+            @RequestBody UserUpdateRequest userUpdateRequest) {
+
+        UserEntity updatedUser = userService.updateUser(
+                userId,
+                userUpdateRequest.getDisplayName(),
+                userUpdateRequest.getPassword()
+        );
+
+        ExceptionApi<UserEntity> response = ExceptionApi.<UserEntity>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .data(updatedUser)
+                .build();
+
+        return response;
     }
 }
