@@ -43,6 +43,21 @@ public class UserController {
         return response;
     }
 
+    @GetMapping("/detail")
+    public ExceptionApi<UserResponse> getUserDetail() {
+        UserEntity user = userService.getUserDetail();
+        UserResponse userResponse = new UserResponse(user.getUserId(), user.getUsername(), user.getDisplayName(), user.getType(), user.getCreatedAt());
+
+        ExceptionApi<UserResponse> response = ExceptionApi.<UserResponse>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .data(userResponse)
+                .build();
+
+        return response;
+    }
+
+
     // 회원가입
     @PostMapping("/register")
     public ExceptionApi<UserEntity> registerUser(

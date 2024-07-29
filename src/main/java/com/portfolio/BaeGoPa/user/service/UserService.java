@@ -39,6 +39,13 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    // 로그인한 사용자 정보 조회 기능
+    public UserEntity getUserDetail() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user"));
+    }
+
     public UserEntity registerUser(
             String username,
             String displayName,
