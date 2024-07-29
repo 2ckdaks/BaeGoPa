@@ -90,4 +90,11 @@ public class UserService {
 
         return userRepository.save(user);
     }
+
+    @Transactional
+    public void deleteUser(Long userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with id " + userId));
+        userRepository.delete(user);
+    }
 }

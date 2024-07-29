@@ -128,4 +128,16 @@ public class UserController {
 
         return response;
     }
+
+    @DeleteMapping("/delete/{userId}")
+    public ExceptionApi<Void> deleteUser(@PathVariable Long userId) {
+        userService.deleteUser(userId);
+
+        ExceptionApi<Void> response = ExceptionApi.<Void>builder()
+                .resultCode(String.valueOf(HttpStatus.OK.value()))
+                .resultMessage(HttpStatus.OK.name())
+                .build();
+
+        return response;
+    }
 }
