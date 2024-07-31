@@ -12,6 +12,8 @@ import com.portfolio.BaeGoPa.store.db.StoreRepository;
 import com.portfolio.BaeGoPa.user.db.UserEntity;
 import com.portfolio.BaeGoPa.user.db.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,7 @@ public class OrderService {
     @Autowired
     private MenuRepository menuRepository;
 
+    @Cacheable(value = "orders", key = "#storeId")
     public List<OrderEntity> getOrders(Long storeId){
         StoreEntity store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
@@ -37,6 +40,7 @@ public class OrderService {
         return orderRepository.findByStore(store);
     }
 
+    @Cacheable(value = "order", key = "{#storeId, #orderId}")
     public OrderEntity getOrderDetail(Long storeId, Long orderId) {
         StoreEntity store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
@@ -45,6 +49,7 @@ public class OrderService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid order ID"));
     }
 
+    @CacheEvict(value = "orders", key = "#storeId")
     public OrderEntity createOrder(
             Long storeId,
             List<OrderItemRequest> orderItemsRequest
@@ -80,6 +85,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
+    @CacheEvict(value = "order", key = "#orderId")
     public OrderEntity updateOrderStatus(Long orderId, OrderStatus status) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity seller = userRepository.findByUsername(username)

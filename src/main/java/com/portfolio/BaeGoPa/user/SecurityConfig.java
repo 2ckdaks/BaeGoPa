@@ -8,6 +8,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 @Configuration
 @EnableWebSecurity
@@ -26,14 +27,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.sessionManagement((session) -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 로그인시 세션데이터를 만들지않음
+        http.sessionManagement(sessionManagement ->
+                sessionManagement
+                        .sessionConcurrency(sessionConcurrency ->
+                                sessionConcurrency
+                                        .maximumSessions(1)
+                                        .maxSessionsPreventsLogin(true)
+                        )
         );
 
-//        http
-//                .csrf(csrf -> csrf.disable()) // 개발시 CSRF 비활성화
-//                .authorizeHttpRequests(authorize -> authorize
-//                        .anyRequest().permitAll()); // 모든 요청을 인증 없이 허용
+        http.sessionManagement(sessionManagement ->
+                sessionManagement
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        );
 
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
@@ -42,5 +48,10 @@ public class SecurityConfig {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
     }
 }

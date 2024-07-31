@@ -13,6 +13,9 @@ import com.portfolio.BaeGoPa.user.db.UserRepository;
 import com.portfolio.BaeGoPa.user.db.UserType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,17 +39,20 @@ public class MenuService {
     @Autowired
     private OrderItemRepository orderItemRepository;
 
+    @Cacheable(value = "menus", key = "#storeId")
     public List<MenuEntity> getMenus(Long storeId) {
         StoreEntity store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
         return menuRepository.findByStoreId(store);
     }
 
+    @Cacheable(value = "menu", key = "#menuId")
     public MenuEntity getMenuDetail(Long menuId){
         return menuRepository.findById(menuId)
                 .orElseThrow(()-> new IllegalArgumentException("Invalid menu ID"));
     }
 
+    @Cacheable(value = "menuReview", key = "#menuReviewId")
     public MenuReviewEntity getMenuReviewDetail(Long storeId, Long menuReviewId){
         StoreEntity store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
@@ -54,6 +60,10 @@ public class MenuService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid review ID or review does not belong to the specified store"));
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "menus", key = "#storeId"),
+            @CacheEvict(value = "menu", allEntries = true)
+    })
     public MenuEntity registerMenu(
             Long storeId,
             String menuName,
@@ -78,6 +88,7 @@ public class MenuService {
         return menuRepository.save(menuEntity);
     }
 
+    @CacheEvict(value = {"menus", "menuReview"}, key = "#menuId")
     public MenuReviewEntity registerReview(
             Long menuId,
             BigDecimal score,
@@ -101,6 +112,10 @@ public class MenuService {
         return menuReviewRepository.save(menuReviewEntity);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "menus", key = "#menu.storeId.storeId"),
+            @CacheEvict(value = "menu", key = "#menuId")
+    })
     @Transactional
     public MenuEntity updateMenu(Long menuId, String menuName, String photoUrl, BigDecimal price) {
         MenuEntity menu = menuRepository.findById(menuId)
@@ -122,6 +137,7 @@ public class MenuService {
         return menuRepository.save(menu);
     }
 
+    @CacheEvict(value = {"menuReview"}, key = "#menuReviewId")
     @Transactional
     public MenuReviewEntity updateReview(Long menuReviewId, BigDecimal score, String review) {
         MenuReviewEntity menuReview = menuReviewRepository.findById(menuReviewId)
@@ -142,6 +158,10 @@ public class MenuService {
         return menuReviewRepository.save(menuReview);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "menus", key = "#menu.storeId.storeId"),
+            @CacheEvict(value = "menu", key = "#menuId")
+    })
     @Transactional
     public void deleteMenu(Long menuId) {
         MenuEntity menu = menuRepository.findById(menuId)
@@ -163,6 +183,7 @@ public class MenuService {
         menuRepository.delete(menu);
     }
 
+    @CacheEvict(value = {"menuReview"}, key = "#menuReviewId")
     @Transactional
     public void deleteReview(Long menuReviewId) {
         MenuReviewEntity menuReview = menuReviewRepository.findById(menuReviewId)

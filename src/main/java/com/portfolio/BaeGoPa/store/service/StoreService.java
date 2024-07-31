@@ -11,6 +11,8 @@ import com.portfolio.BaeGoPa.user.db.UserRepository;
 import com.portfolio.BaeGoPa.user.db.UserType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,20 +29,16 @@ public class StoreService {
     private StoreRepository storeRepository;
     @Autowired
     private StoreReviewRepository storeReviewRepository;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private MenuRepository menuRepository;
-
     @Autowired
     private OrderRepository orderRepository;
-
     @Autowired
     private OrderItemRepository orderItemRepository;
 
-
+    @CacheEvict(value = "stores", allEntries = true)
     public StoreEntity registerStore(
             String storeName,
             String address,
@@ -48,7 +46,6 @@ public class StoreService {
             String category,
             String photoUrl
     ){
-        // TODO : 로그인 유저가 seller인지 확인 필요할듯?
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         log.info("Username from SecurityContext: {}", username);
         UserEntity seller = userRepository.findByUsername(username)
@@ -70,6 +67,7 @@ public class StoreService {
     }
 
     @Transactional
+    @CacheEvict(value = "store", key = "#storeId")
     public StoreEntity updateStoreStatus(Long storeId, StoreStatus status) {
         StoreEntity store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new NoSuchElementException("Store not found with id " + storeId));
@@ -87,21 +85,25 @@ public class StoreService {
         return storeRepository.save(store);
     }
 
+    @Cacheable(value = "stores")
     public List<StoreEntity> getAllStores() {
         return storeRepository.findAll();
     }
 
+    @Cacheable(value = "store", key = "#storeId")
     public StoreEntity getStoreDetail(Long storeId) {
         return storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
     }
 
+    @Cacheable(value = "storeReviews", key = "#storeId")
     public List<StoreReviewEntity> getStoreReviews(Long storeId) {
         StoreEntity store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
         return storeReviewRepository.findByStoreId(store);
     }
 
+    @Cacheable(value = "storeReview", key = "{#storeId, #reviewId}")
     public StoreReviewEntity getStoreReviewDetail(Long storeId, Long reviewId) {
         StoreEntity store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
@@ -109,12 +111,12 @@ public class StoreService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid review ID or review does not belong to the specified store"));
     }
 
+    @CacheEvict(value = "storeReviews", key = "#storeId")
     public StoreReviewEntity registerReview(
             Long storeId,
             BigDecimal score,
             String review
     ){
-        // TODO : 리뷰작성자가 올바른지 검증 필요할듯?
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity consumer = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid consumer"));
@@ -132,6 +134,7 @@ public class StoreService {
     }
 
     @Transactional
+    @CacheEvict(value = "store", key = "#storeId")
     public StoreEntity updateStore(Long storeId, String storeName, String address, String category, String phone, String photoUrl) {
         StoreEntity store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new NoSuchElementException("Store not found with id " + storeId));
@@ -155,6 +158,7 @@ public class StoreService {
     }
 
     @Transactional
+    @CacheEvict(value = "storeReview", key = "{#storeId, #reviewId}")
     public StoreReviewEntity updateStoreReview(Long storeId, Long reviewId, BigDecimal score, String review) {
         StoreEntity store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid store ID"));
@@ -177,6 +181,7 @@ public class StoreService {
     }
 
     @Transactional
+    @CacheEvict(value = "store", key = "#storeId")
     public void deleteStore(Long storeId) {
         StoreEntity store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new NoSuchElementException("Store not found with id " + storeId));
@@ -213,6 +218,7 @@ public class StoreService {
     }
 
     @Transactional
+    @CacheEvict(value = "storeReview", key = "#storeReviewId")
     public void deleteReview(Long storeReviewId) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity user = userRepository.findByUsername(username)
