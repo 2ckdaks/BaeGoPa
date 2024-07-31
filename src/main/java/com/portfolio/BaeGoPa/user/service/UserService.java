@@ -5,6 +5,8 @@ import com.portfolio.BaeGoPa.user.db.UserEntity;
 import com.portfolio.BaeGoPa.user.db.UserRepository;
 import com.portfolio.BaeGoPa.user.db.UserType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +29,7 @@ public class UserService {
     @Autowired
     private AuthenticationManagerBuilder authenticationManagerBuilder;
 
+    @Cacheable(value = "users", key = "#root.methodName")
     public List<UserEntity> getAllUsers() {
         // 로그인한 사용자 정보 가져오기
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -42,12 +45,13 @@ public class UserService {
     }
 
     // 로그인한 사용자 정보 조회 기능
-    public UserEntity getUserDetail() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    @Cacheable(value = "users", key = "#username")
+    public UserEntity getUserDetail(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자입니다."));
     }
 
+    @CacheEvict(value = "users", allEntries = true)
     public UserEntity registerUser(
             String username,
             String displayName,
@@ -75,6 +79,7 @@ public class UserService {
         return JwtUtil.createToken(SecurityContextHolder.getContext().getAuthentication());
     }
 
+    @CacheEvict(value = "users", key = "#userId")
     @Transactional
     public UserEntity updateUser(Long userId, String displayName, String password) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -100,6 +105,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @CacheEvict(value = "users", key = "#userId")
     @Transactional
     public void deleteUser(Long userId) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();

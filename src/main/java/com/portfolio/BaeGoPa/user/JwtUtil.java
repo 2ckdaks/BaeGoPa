@@ -47,11 +47,11 @@ public class JwtUtil implements ApplicationListener<ContextRefreshedEvent> {
 
         String jwt = Jwts.builder()
                 .claim("username", user.getUsername())
-                .claim("displayName", user.displayName)
-                .claim("userType", user.type)
+                .claim("displayName", user.getDisplayName())
+                .claim("userType", user.getType())
                 .claim("authority", authorities) // 권한이 있다면 추가
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 600000)) //유효기간 10초
+                .setExpiration(new Date(System.currentTimeMillis() + 600000))
                 .signWith(key)
                 .compact();
         return jwt;

@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,7 +47,8 @@ public class UserController {
 
     @GetMapping("/detail")
     public ExceptionApi<UserResponse> getUserDetail() {
-        UserEntity user = userService.getUserDetail();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userService.getUserDetail(username);
         UserResponse userResponse = new UserResponse(user.getUserId(), user.getUsername(), user.getDisplayName(), user.getType(), user.getCreatedAt());
 
         ExceptionApi<UserResponse> response = ExceptionApi.<UserResponse>builder()
@@ -57,7 +59,6 @@ public class UserController {
 
         return response;
     }
-
 
     // 회원가입
     @PostMapping("/register")
