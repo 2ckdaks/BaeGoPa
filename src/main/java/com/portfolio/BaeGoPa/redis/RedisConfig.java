@@ -46,6 +46,14 @@ public class RedisConfig {
     }
 
     @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.registerModule(new SimpleModule());
+        return objectMapper;
+    }
+
+    @Bean
     public CacheManager cacheManager() {
         RedisCacheManager.RedisCacheManagerBuilder builder = RedisCacheManager
                 .RedisCacheManagerBuilder

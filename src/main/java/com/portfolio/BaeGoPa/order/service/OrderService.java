@@ -7,6 +7,7 @@ import com.portfolio.BaeGoPa.order.db.OrderItemEntity;
 import com.portfolio.BaeGoPa.order.db.OrderRepository;
 import com.portfolio.BaeGoPa.order.db.OrderStatus;
 import com.portfolio.BaeGoPa.order.model.OrderItemRequest;
+import com.portfolio.BaeGoPa.redis.QueueService;
 import com.portfolio.BaeGoPa.store.db.StoreEntity;
 import com.portfolio.BaeGoPa.store.db.StoreRepository;
 import com.portfolio.BaeGoPa.user.db.UserEntity;
@@ -31,6 +32,8 @@ public class OrderService {
     private StoreRepository storeRepository;
     @Autowired
     private MenuRepository menuRepository;
+    @Autowired
+    private QueueService queueService;
 
     @Cacheable(value = "orders", key = "#storeId")
     public List<OrderEntity> getOrders(Long storeId){
@@ -82,7 +85,12 @@ public class OrderService {
         }
 
         order.setTotalPrice(totalPrice);
-        return orderRepository.save(order);
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        // 큐에 주문 추가
+        queueService.addToQueue(savedOrder);
+
+        return savedOrder;
     }
 
     @CacheEvict(value = "order", key = "#orderId")
