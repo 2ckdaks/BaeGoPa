@@ -7,6 +7,9 @@ import com.portfolio.BaeGoPa.user.model.UserRequest;
 import com.portfolio.BaeGoPa.user.model.UserResponse;
 import com.portfolio.BaeGoPa.user.model.UserUpdateRequest;
 import com.portfolio.BaeGoPa.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Tag(name = "User API", description = "사용자 관련 API")
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -29,6 +33,7 @@ public class UserController {
     @Autowired
     private AuthenticationManagerBuilder authenticationManagerBuilder;
 
+    @Operation(summary = "모든 사용자 목록 조회", description = "시스템에 등록된 모든 사용자의 목록을 반환")
     @GetMapping("/list")
     public ExceptionApi<List<UserResponse>> getAllUsers() {
         List<UserEntity> users = userService.getAllUsers();
@@ -45,6 +50,7 @@ public class UserController {
         return response;
     }
 
+    @Operation(summary = "로그인한 사용자 정보 조회", description = "로그인한 사용자의 상세 정보를 반환")
     @GetMapping("/detail")
     public ExceptionApi<UserResponse> getUserDetail() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -60,7 +66,7 @@ public class UserController {
         return response;
     }
 
-    // 회원가입
+    @Operation(summary = "사용자 등록", description = "새 사용자를 등록")
     @PostMapping("/register")
     public ExceptionApi<UserEntity> registerUser(
             @RequestBody UserRequest userRequest
@@ -81,7 +87,7 @@ public class UserController {
         return registerUser;
     }
 
-    // 로그인시 jwt 발급
+    @Operation(summary = "JWT 로그인", description = "사용자를 로그인하고 JWT를 반환")
     @PostMapping("/login/jwt")
     public ExceptionApi<String> loginJwt(
             @RequestBody Map<String, String> data,
@@ -105,14 +111,15 @@ public class UserController {
     }
 
     // cookie저장 확인용 테스트 코드
-    @GetMapping("/")
-    public String index() {
-        return "index";  // src/main/resources/static/index.html 파일을 반환
-    }
+//    @GetMapping("/")
+//    public String index() {
+//        return "index";  // src/main/resources/static/index.html 파일을 반환
+//    }
 
+    @Operation(summary = "사용자 정보 수정", description = "지정된 사용자의 정보를 수정")
     @PutMapping("/edit/{userId}")
     public ExceptionApi<UserEntity> updateUser(
-            @PathVariable Long userId,
+            @Parameter(description = "수정할 사용자 ID") @PathVariable Long userId,
             @RequestBody UserUpdateRequest userUpdateRequest) {
 
         UserEntity updatedUser = userService.updateUser(
@@ -130,8 +137,10 @@ public class UserController {
         return response;
     }
 
+    @Operation(summary = "사용자 삭제", description = "지정된 사용자를 삭제")
     @DeleteMapping("/delete/{userId}")
-    public ExceptionApi<Void> deleteUser(@PathVariable Long userId) {
+    public ExceptionApi<Void> deleteUser(
+            @Parameter(description = "삭제할 사용자 ID") @PathVariable Long userId) {
         userService.deleteUser(userId);
 
         ExceptionApi<Void> response = ExceptionApi.<Void>builder()
